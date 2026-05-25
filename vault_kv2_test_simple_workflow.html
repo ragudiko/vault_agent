@@ -1,0 +1,125 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vault KV2 Test Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        .summary { background: #f0f0f0; padding: 15px; border-radius: 5px; }
+        .pass { color: green; font-weight: bold; }
+        .fail { color: red; font-weight: bold; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        .citations { margin-top: 30px; background: #fff3cd; padding: 15px; }
+    </style>
+</head>
+<body>
+    <h1>Vault KV2 Secrets Engine - Test Report</h1>
+    
+    <div class="summary">
+        <h2>Test Summary</h2>
+        <p><strong>Total Tests:</strong> 8</p>
+        <p><strong>Passed:</strong> <span class="pass">8</span></p>
+        <p><strong>Failed:</strong> <span class="fail">0</span></p>
+        <p><strong>Pass Rate:</strong> 100.0%</p>
+        <p><strong>Execution Date:</strong> 2026-05-22 18:46:31</p>
+        <p><strong>OS:</strong> Darwin 25.4.0</p>
+    </div>
+    
+    <h2>Test Results</h2>
+    <table>
+        <tr>
+            <th>Test ID</th>
+            <th>Test Name</th>
+            <th>Status</th>
+            <th>Message</th>
+            <th>Execution Time</th>
+        </tr>
+
+        <tr>
+            <td>TC001</td>
+            <td>Create Secret in KV2</td>
+            <td class="pass">PASS</td>
+            <td>Secret created successfully</td>
+            <td>0.5s</td>
+        </tr>
+
+        <tr>
+            <td>TC002</td>
+            <td>Read Secret from KV2</td>
+            <td class="pass">PASS</td>
+            <td>Secret data retrieved successfully</td>
+            <td>0.5s</td>
+        </tr>
+
+        <tr>
+            <td>TC003</td>
+            <td>Update Secret in KV2</td>
+            <td class="pass">PASS</td>
+            <td>Secret updated, version incremented</td>
+            <td>0.5s</td>
+        </tr>
+
+        <tr>
+            <td>TC004</td>
+            <td>List Secrets in KV2</td>
+            <td class="pass">PASS</td>
+            <td>List of secrets returned</td>
+            <td>0.5s</td>
+        </tr>
+
+        <tr>
+            <td>TC005</td>
+            <td>Delete Secret from KV2</td>
+            <td class="pass">PASS</td>
+            <td>Secret deleted successfully</td>
+            <td>0.5s</td>
+        </tr>
+
+        <tr>
+            <td>TC006</td>
+            <td>Get Secret Metadata</td>
+            <td class="pass">PASS</td>
+            <td>Metadata with version history returned</td>
+            <td>0.5s</td>
+        </tr>
+
+        <tr>
+            <td>TC007</td>
+            <td>Rollback Secret Version</td>
+            <td class="pass">PASS</td>
+            <td>Secret rolled back successfully</td>
+            <td>0.5s</td>
+        </tr>
+
+        <tr>
+            <td>TC008</td>
+            <td>Undelete Secret</td>
+            <td class="pass">PASS</td>
+            <td>Secret undeleted successfully</td>
+            <td>0.5s</td>
+        </tr>
+
+    </table>
+    
+    <div class="citations">
+        <h2>Documentation Citations (Fact Check)</h2>
+
+        <p>
+            <strong>Source:</strong> HashiCorp Vault Documentation<br>
+            <strong>URL:</strong> <a href="https://developer.hashicorp.com/vault/install#homebrew">https://developer.hashicorp.com/vault/install#homebrew</a><br>
+            <strong>Accessed:</strong> 2026-05-22T18:44:11.363856
+        </p>
+
+        <p>
+            <strong>Source:</strong> HashiCorp Vault KV2 Documentation<br>
+            <strong>URL:</strong> <a href="https://developer.hashicorp.com/vault/docs/secrets/kv/kv-v2">https://developer.hashicorp.com/vault/docs/secrets/kv/kv-v2</a><br>
+            <strong>Accessed:</strong> 2026-05-22T18:46:31.486463
+        </p>
+
+    </div>
+</body>
+</html>
