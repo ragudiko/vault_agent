@@ -17,12 +17,10 @@ sequenceDiagram
     participant System as OS/Package Manager
 
     User->>MainSetup: Run python main_setup.py
-    activate MainSetup
     
     Note over MainSetup: STEP 1: VAULT INSTALLATION
     
     MainSetup->>Installer: Create VaultInstaller()
-    activate Installer
     
     Installer->>System: Detect OS
     Note right of System: platform.system()<br/>platform.release()
@@ -34,9 +32,7 @@ sequenceDiagram
     alt Vault Already Installed
         System-->>Installer: ✓ Vault v1.15.0
         Installer-->>MainSetup: ✓ Installation verified
-        deactivate Installer
         Note over MainSetup: Proceed to Step 2
-        deactivate MainSetup
     else Vault Not Installed
         Installer->>System: Install Vault
         
@@ -58,15 +54,11 @@ sequenceDiagram
         alt Verification Success
             System-->>Installer: ✓ Vault v1.15.0
             Installer-->>MainSetup: ✓ Installation verified
-            deactivate Installer
             Note over MainSetup: Proceed to Step 2
-            deactivate MainSetup
         else Verification Failed
             System-->>Installer: ❌ Command not found
             Installer-->>MainSetup: ❌ Installation failed
-            deactivate Installer
             MainSetup->>User: ❌ PIPELINE TERMINATED<br/>Exit code 1
-            deactivate MainSetup
         end
     end
 ```
@@ -82,32 +74,26 @@ sequenceDiagram
 
     Note over MainSetup: Vault installation verified ✓
     
-    activate MainSetup
     Note over MainSetup: STEP 2: TEST GENERATION
     
     MainSetup->>User: 📋 Enter your Vault feature test request:
     User-->>MainSetup: "I want to test KV2 secrets"
     
     MainSetup->>Gemini: analyze_and_validate_intent(prompt)
-    activate Gemini
     
     Note right of Gemini: System Instruction:<br/>Extract feature name<br/>from user prompt
     
     Gemini->>Gemini: Process prompt with AI
     Gemini->>Validator: Extract feature: "kv"
-    activate Validator
     
     Validator->>Validator: Check against<br/>VALID_VAULT_FEATURES
     Note right of Validator: ["kv", "database", "pki",<br/>"transit", "ldap", ...]
     
     alt Feature Valid
         Validator-->>Gemini: ✓ "kv" is valid
-        deactivate Validator
         Gemini-->>MainSetup: ✓ Feature validated: "kv"
-        deactivate Gemini
         
         MainSetup->>Gemini: generate_test_suite("kv")
-        activate Gemini
         
         Note right of Gemini: System Instruction:<br/>Generate 3 pytest tests<br/>for KV2 feature
         
@@ -115,23 +101,18 @@ sequenceDiagram
         Note right of Gemini: - test_create_secret()<br/>- test_read_secret()<br/>- test_delete_secret()
         
         Gemini-->>MainSetup: Python test code<br/>(wrapped in ```python)
-        deactivate Gemini
         
         MainSetup->>MainSetup: Extract code from markdown
         Note over MainSetup: Parse ```python ... ```
         
         MainSetup->>MainSetup: ✓ Test code ready
         Note over MainSetup: Proceed to Step 3
-        deactivate MainSetup
         
     else Feature Invalid
         Validator-->>Gemini: ❌ "xyz" not in list
-        deactivate Validator
         Gemini-->>MainSetup: None (validation failed)
-        deactivate Gemini
         
         MainSetup->>User: ❌ PIPELINE TERMINATED<br/>Invalid feature<br/>Exit code 1
-        deactivate MainSetup
     end
 ```
 
