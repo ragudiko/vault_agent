@@ -5,7 +5,9 @@ This document contains editable flow diagrams for the `main_setup.py` pipeline.
 
 ---
 
-## 1. High-Level Sequence Diagram
+## 1. Sequence Diagrams (Separated by Step)
+
+### 1.1 STEP 1: Vault Installation Sequence
 
 ```mermaid
 sequenceDiagram
@@ -13,72 +15,189 @@ sequenceDiagram
     participant MainSetup as main_setup.py
     participant Installer as VaultInstaller
     participant System as OS/Package Manager
-    participant Gemini as Gemini AI
-    participant Pytest as Pytest Runner
 
     User->>MainSetup: Run python main_setup.py
+    activate MainSetup
     
-    rect rgb(200, 220, 255)
-        Note over MainSetup,System: STEP 1: VAULT INSTALLATION
-        MainSetup->>Installer: Create VaultInstaller()
-        Installer->>System: Detect OS (platform.system())
-        System-->>Installer: OS Info (Darwin/Linux/Windows)
+    Note over MainSetup: STEP 1: VAULT INSTALLATION
+    
+    MainSetup->>Installer: Create VaultInstaller()
+    activate Installer
+    
+    Installer->>System: Detect OS
+    Note right of System: platform.system()<br/>platform.release()
+    System-->>Installer: OS Info<br/>(Darwin/Linux/Windows)
+    
+    Installer->>System: Check if Vault installed
+    Note right of System: vault --version
+    
+    alt Vault Already Installed
+        System-->>Installer: ✓ Vault v1.15.0
+        Installer-->>MainSetup: ✓ Installation verified
+        Note over MainSetup: Proceed to Step 2
+    else Vault Not Installed
+        Installer->>System: Install Vault
         
-        Installer->>System: Check if Vault installed (vault --version)
-        alt Vault Already Installed
-            System-->>Installer: Version info
+        alt macOS
+            Note right of System: brew tap hashicorp/tap<br/>brew install vault
+        else Linux (Ubuntu/Debian)
+            Note right of System: apt update<br/>apt install vault
+        else Linux (RHEL/CentOS)
+            Note right of System: yum install vault
+        else Windows
+            Note right of System: choco install vault
+        end
+        
+        System-->>Installer: Installation complete
+        
+        Installer->>System: Verify installation
+        Note right of System: vault --version
+        
+        alt Verification Success
+            System-->>Installer: ✓ Vault v1.15.0
             Installer-->>MainSetup: ✓ Installation verified
-        else Vault Not Installed
-            Installer->>System: Install via package manager
-            Note over Installer,System: brew/apt/yum/choco install vault
-            System-->>Installer: Installation result
-            Installer->>System: Verify installation
-            System-->>Installer: ✓ Vault installed
-            Installer-->>MainSetup: ✓ Installation verified
+            Note over MainSetup: Proceed to Step 2
+        else Verification Failed
+            System-->>Installer: ❌ Command not found
+            Installer-->>MainSetup: ❌ Installation failed
+            deactivate Installer
+            MainSetup->>User: ❌ PIPELINE TERMINATED<br/>Exit code 1
+            deactivate MainSetup
         end
     end
     
-    alt Installation Failed
-        MainSetup->>User: ❌ PIPELINE TERMINATED
-        Note over User,MainSetup: Exit code 1
-    end
+    deactivate Installer
+```
+
+### 1.2 STEP 2: Test Generation Sequence
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant MainSetup as main_setup.py
+    participant Gemini as Gemini AI
+    participant Validator as Feature Validator
+
+    Note over MainSetup: Vault installation verified ✓
     
-    rect rgb(200, 255, 220)
-        Note over MainSetup,Gemini: STEP 2: TEST GENERATION
-        MainSetup->>User: Prompt for test request
-        User-->>MainSetup: "I want to test KV2 secrets"
+    activate MainSetup
+    Note over MainSetup: STEP 2: TEST GENERATION
+    
+    MainSetup->>User: 📋 Enter your Vault feature test request:
+    User-->>MainSetup: "I want to test KV2 secrets"
+    
+    MainSetup->>Gemini: analyze_and_validate_intent(prompt)
+    activate Gemini
+    
+    Note right of Gemini: System Instruction:<br/>Extract feature name<br/>from user prompt
+    
+    Gemini->>Gemini: Process prompt with AI
+    Gemini->>Validator: Extract feature: "kv"
+    activate Validator
+    
+    Validator->>Validator: Check against<br/>VALID_VAULT_FEATURES
+    Note right of Validator: ["kv", "database", "pki",<br/>"transit", "ldap", ...]
+    
+    alt Feature Valid
+        Validator-->>Gemini: ✓ "kv" is valid
+        Gemini-->>MainSetup: ✓ Feature validated: "kv"
+        deactivate Validator
+        deactivate Gemini
         
-        MainSetup->>Gemini: analyze_and_validate_intent(prompt)
-        Gemini->>Gemini: Extract feature name
-        Gemini->>Gemini: Validate against VALID_VAULT_FEATURES
+        MainSetup->>Gemini: generate_test_suite("kv")
+        activate Gemini
         
-        alt Valid Feature
-            Gemini-->>MainSetup: ✓ "kv" validated
-            MainSetup->>Gemini: generate_test_suite("kv")
-            Gemini->>Gemini: Generate 3 pytest test functions
-            Gemini-->>MainSetup: Python test code
-        else Invalid Feature
-            Gemini-->>MainSetup: None (validation failed)
-            MainSetup->>User: ❌ PIPELINE TERMINATED
-            Note over User,MainSetup: Exit code 1
+        Note right of Gemini: System Instruction:<br/>Generate 3 pytest tests<br/>for KV2 feature
+        
+        Gemini->>Gemini: Generate Python code
+        Note right of Gemini: - test_create_secret()<br/>- test_read_secret()<br/>- test_delete_secret()
+        
+        Gemini-->>MainSetup: Python test code<br/>(wrapped in ```python)
+        deactivate Gemini
+        
+        MainSetup->>MainSetup: Extract code from markdown
+        Note over MainSetup: Parse ```python ... ```
+        
+        MainSetup->>MainSetup: ✓ Test code ready
+        Note over MainSetup: Proceed to Step 3
+        
+    else Feature Invalid
+        Validator-->>Gemini: ❌ "xyz" not in list
+        deactivate Validator
+        Gemini-->>MainSetup: None (validation failed)
+        deactivate Gemini
+        
+        MainSetup->>User: ❌ PIPELINE TERMINATED<br/>Invalid feature<br/>Exit code 1
+        deactivate MainSetup
+    end
+```
+
+### 1.3 STEP 3: Test Execution Sequence
+
+```mermaid
+sequenceDiagram
+    participant User
+    participant MainSetup as main_setup.py
+    participant FileSystem as File System
+    participant Pytest as Pytest Runner
+    participant Vault as Vault CLI
+    participant Report as HTML Report
+
+    Note over MainSetup: Test code generated ✓
+    
+    activate MainSetup
+    Note over MainSetup: STEP 3: TEST EXECUTION
+    
+    MainSetup->>FileSystem: Write test code
+    Note right of FileSystem: test_vault_dynamic_suite.py
+    FileSystem-->>MainSetup: ✓ File saved
+    
+    MainSetup->>Pytest: Run pytest with HTML report
+    Note right of Pytest: pytest test_vault_dynamic_suite.py<br/>--html=vault_execution_report.html
+    activate Pytest
+    
+    Pytest->>Pytest: Discover test functions
+    Note right of Pytest: - test_create_secret<br/>- test_read_secret<br/>- test_delete_secret
+    
+    loop For each test
+        Pytest->>Vault: Execute vault CLI command
+        activate Vault
+        Note right of Vault: vault kv put secret/test<br/>vault kv get secret/test<br/>vault kv delete secret/test
+        
+        Vault->>Vault: Process command
+        
+        alt Command Success
+            Vault-->>Pytest: ✓ Success (returncode=0)<br/>stdout: "Success! Data written..."
+            Note over Pytest: Test PASSED ✓
+        else Command Failed
+            Vault-->>Pytest: ❌ Error (returncode≠0)<br/>stderr: "Error: permission denied"
+            Note over Pytest: Test FAILED ✗
         end
+        deactivate Vault
     end
     
-    rect rgb(255, 220, 200)
-        Note over MainSetup,Pytest: STEP 3: TEST EXECUTION
-        MainSetup->>MainSetup: Save test code to file
-        Note over MainSetup: test_vault_dynamic_suite.py
-        
-        MainSetup->>Pytest: Run pytest with HTML report
-        Pytest->>System: Execute vault CLI commands
-        System-->>Pytest: Command results
-        Pytest->>Pytest: Generate HTML report
-        Pytest-->>MainSetup: Test results
-        
-        MainSetup->>User: ✨ Report: vault_execution_report.html
-    end
+    Pytest->>Report: Generate HTML report
+    activate Report
+    Note right of Report: Compile test results<br/>Format as HTML<br/>Add CSS styling
+    Report-->>Pytest: ✓ Report created
+    deactivate Report
     
-    MainSetup->>User: ✓ PIPELINE COMPLETED
+    Pytest-->>MainSetup: Test execution complete
+    Note right of Pytest: Summary:<br/>3 passed, 0 failed
+    deactivate Pytest
+    
+    MainSetup->>FileSystem: Check report exists
+    FileSystem-->>MainSetup: ✓ vault_execution_report.html
+    
+    MainSetup->>User: ✨ [SUCCESS] Execution complete<br/>HTML report: vault_execution_report.html
+    
+    MainSetup->>User: ✓ PIPELINE COMPLETED<br/>Exit code 0
+    deactivate MainSetup
+    
+    User->>Report: Open in browser
+    activate Report
+    Report-->>User: Display test results
+    deactivate Report
 ```
 
 ---
