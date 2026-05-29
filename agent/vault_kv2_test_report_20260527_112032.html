@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Vault KV2 Test Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; border-bottom: 3px solid #4CAF50; padding-bottom: 10px; }
+        .summary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .summary h2 { margin-top: 0; color: white; }
+        .stat { display: inline-block; margin: 10px 20px 10px 0; }
+        .pass { color: #4CAF50; font-weight: bold; }
+        .fail { color: #f44336; font-weight: bold; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f5f5f5; }
+        .citations { margin-top: 30px; background: #fff3cd; padding: 20px; border-left: 4px solid #ffc107; }
+        .citation { margin: 15px 0; padding: 10px; background: white; border-radius: 4px; }
+        .execution-details { font-size: 0.9em; color: #666; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.85em; }
+        .badge-pass { background: #4CAF50; color: white; }
+        .badge-fail { background: #f44336; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔐 Vault KV2 Secrets Engine - Test Report</h1>
+        
+        <div class="summary">
+            <h2>Test Summary</h2>
+            <div class="stat"><strong>Total Tests:</strong> 8</div>
+            <div class="stat"><strong>Passed:</strong> <span style="color: #90EE90;">8</span></div>
+            <div class="stat"><strong>Failed:</strong> <span style="color: #FFB6C1;">0</span></div>
+            <div class="stat"><strong>Pass Rate:</strong> 100.0%</div>
+            <div style="margin-top: 15px;">
+                <div class="stat"><strong>Execution Date:</strong> 2026-05-27 11:20:32</div>
+                <div class="stat"><strong>OS:</strong> Darwin 25.5.0</div>
+                <div class="stat"><strong>Architecture:</strong> arm64</div>
+            </div>
+        </div>
+        
+        <h2>📊 Test Results</h2>
+        <table>
+            <tr>
+                <th>Test ID</th>
+                <th>Test Name</th>
+                <th>Status</th>
+                <th>Message</th>
+                <th>Execution Time</th>
+                <th>Return Code</th>
+            </tr>
+
+            <tr>
+                <td><strong>TC001</strong></td>
+                <td>Create Secret in KV2</td>
+                <td><span class="badge badge-pass">PASS</span></td>
+                <td>Secret created successfully</td>
+                <td>0.08s</td>
+                <td>0</td>
+            </tr>
+
+            <tr>
+                <td><strong>TC002</strong></td>
+                <td>Read Secret from KV2</td>
+                <td><span class="badge badge-pass">PASS</span></td>
+                <td>Secret data retrieved successfully</td>
+                <td>0.08s</td>
+                <td>0</td>
+            </tr>
+
+            <tr>
+                <td><strong>TC003</strong></td>
+                <td>Update Secret in KV2</td>
+                <td><span class="badge badge-pass">PASS</span></td>
+                <td>Secret updated, version incremented</td>
+                <td>0.08s</td>
+                <td>0</td>
+            </tr>
+
+            <tr>
+                <td><strong>TC004</strong></td>
+                <td>List Secrets in KV2</td>
+                <td><span class="badge badge-pass">PASS</span></td>
+                <td>List of secrets returned</td>
+                <td>0.08s</td>
+                <td>0</td>
+            </tr>
+
+            <tr>
+                <td><strong>TC005</strong></td>
+                <td>Get Secret Metadata</td>
+                <td><span class="badge badge-pass">PASS</span></td>
+                <td>Metadata with version history returned</td>
+                <td>0.08s</td>
+                <td>0</td>
+            </tr>
+
+            <tr>
+                <td><strong>TC006</strong></td>
+                <td>Delete Secret from KV2</td>
+                <td><span class="badge badge-pass">PASS</span></td>
+                <td>Secret deleted successfully</td>
+                <td>0.07s</td>
+                <td>0</td>
+            </tr>
+
+            <tr>
+                <td><strong>TC007</strong></td>
+                <td>Undelete Secret</td>
+                <td><span class="badge badge-pass">PASS</span></td>
+                <td>Secret undeleted successfully</td>
+                <td>0.08s</td>
+                <td>0</td>
+            </tr>
+
+            <tr>
+                <td><strong>TC008</strong></td>
+                <td>Destroy Secret Version</td>
+                <td><span class="badge badge-pass">PASS</span></td>
+                <td>Secret version destroyed permanently</td>
+                <td>0.08s</td>
+                <td>0</td>
+            </tr>
+
+        </table>
+        
+        <div class="citations">
+            <h2>📚 Documentation Citations (Fact Check)</h2>
+            <p><em>All test implementations are based on official HashiCorp documentation:</em></p>
+
+            <div class="citation">
+                <strong>Citation 1:</strong> HashiCorp Vault Documentation<br>
+                <strong>URL:</strong> <a href="https://developer.hashicorp.com/vault/install#homebrew" target="_blank">https://developer.hashicorp.com/vault/install#homebrew</a><br>
+                <strong>Accessed:</strong> 2026-05-27T11:20:18.759839
+            </div>
+
+            <div class="citation">
+                <strong>Citation 2:</strong> HashiCorp Vault KV2 Documentation<br>
+                <strong>URL:</strong> <a href="https://developer.hashicorp.com/vault/docs/secrets/kv/kv-v2" target="_blank">https://developer.hashicorp.com/vault/docs/secrets/kv/kv-v2</a><br>
+                <strong>Accessed:</strong> 2026-05-27T11:20:28.323389
+            </div>
+
+        </div>
+        
+        # <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-left: 4px solid #2196F3;">
+        #     <h3>🤖 MCP Significance Demonstration</h3>
+        #     <p>This workflow demonstrates how <strong>Model Context Protocol (MCP)</strong> enables LLMs to:</p>
+        #     <ul>
+        #         <li>Execute real system commands (Vault CLI)</li>
+        #         <li>Interact with external services (HashiCorp Vault)</li>
+        #         <li>Capture and validate actual outputs</li>
+        #         <li>Generate reports based on real execution results</li>
+        #         <li>Provide citations from authoritative sources</li>
+        #     </ul>
+        #     <p><em>Without MCP, LLMs would only simulate or hallucinate results. With MCP, they execute real commands and provide verifiable outcomes.</em></p>
+        # </div>
+    </div>
+</body>
+</html>

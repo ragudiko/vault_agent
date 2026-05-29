@@ -217,114 +217,23 @@ def test_placeholder(setup_vault):
         
         return base_template + tests
     
-    def clean_llm_output(self, code_str):
-        """Clean LLM output to extract only valid Python code."""
-        # Remove markdown code blocks
-        if "```python" in code_str:
-            code_str = code_str.split("```python")[1].split("```")[0]
-        elif "```" in code_str:
-            parts = code_str.split("```")
-            if len(parts) >= 2:
-                code_str = parts[1]
-        
-        # Split into lines and filter
-        lines = code_str.split('\n')
-        cleaned_lines = []
-        in_function = False
-        
-        for line in lines:
-            stripped = line.strip()
-            
-            # Start of a function
-            if stripped.startswith('def test_'):
-                in_function = True
-                cleaned_lines.append(line)
-            # Inside a function
-            elif in_function:
-                # Keep indented lines (function body)
-                if line.startswith('    ') or line.startswith('\t') or stripped == '':
-                    cleaned_lines.append(line)
-                # End of function (non-indented line that's not empty)
-                elif stripped and not line.startswith(' '):
-                    # Check if it's another function
-                    if stripped.startswith('def test_'):
-                        cleaned_lines.append(line)
-                    else:
-                        in_function = False
-            # Skip lines that look like explanatory text
-            elif any(keyword in stripped.lower() for keyword in [
-                'we need', 'we can', 'we will', 'we\'ll', 'but ', 'so ',
-                'the user', 'example:', 'note:', 'important:'
-            ]):
-                continue
-            # Keep import statements
-            elif stripped.startswith('import ') or stripped.startswith('from '):
-                cleaned_lines.append(line)
-            # Keep decorator lines
-            elif stripped.startswith('@'):
-                cleaned_lines.append(line)
-        
-        return '\n'.join(cleaned_lines)
-    
-    def validate_test_code(self, code):
-        """Validate that code contains valid test functions."""
-        # Must have at least one test function
-        if 'def test_' not in code:
-            return False
-        
-        # Check for basic Python syntax (very basic check)
-        lines = code.split('\n')
-        for line in lines:
-            stripped = line.strip()
-            # Skip empty lines and comments
-            if not stripped or stripped.startswith('#'):
-                continue
-            # Check for common syntax issues
-            if stripped and not any([
-                stripped.startswith('def '),
-                stripped.startswith('import '),
-                stripped.startswith('from '),
-                stripped.startswith('@'),
-                stripped.startswith('assert '),
-                stripped.startswith('result '),
-                stripped.startswith('run_command'),
-                stripped.startswith('return '),
-                stripped.startswith('if '),
-                stripped.startswith('try:'),
-                stripped.startswith('except'),
-                stripped.startswith('yield'),
-                stripped.startswith('load_dotenv'),
-                stripped.startswith('env '),
-                stripped.startswith('pytest.'),
-                '=' in stripped,
-                stripped == 'pass'
-            ]):
-                # Line doesn't match expected patterns - might be explanatory text
-                if len(stripped) > 20 and not stripped.startswith('"') and not stripped.startswith("'"):
-                    print(f"  Warning: Suspicious line: {stripped[:50]}...")
-                    return False
-        
-        return True
-    
     def generate_test_code(self, feature):
         """Generate test code - try LLM first, fallback to template."""
         
         # Try LLM generation
-        prompt = f"""Generate ONLY Python code with pytest test functions for Vault {feature} feature.
+        prompt = f"""Generate pytest test functions for Vault {feature} feature.
 
-Requirements:
-- Create 3-4 test functions
+Create 3-4 test functions that:
 - Use setup_vault fixture
 - Call run_command() with vault CLI commands
 - Include assertions
-- NO explanatory text, ONLY code
 
-Example format:
+Example:
 def test_create_secret(setup_vault):
     result = run_command("vault kv put secret/test key=value")
     assert "created_time" in result
 
-Generate ONLY the test functions for {feature} (no explanations):"""
+Generate test functions for {feature}:"""
         
         print(f"\n  Attempting LLM test generation...")
         code = self.generate_response(prompt)
@@ -333,12 +242,11 @@ Generate ONLY the test functions for {feature} (no explanations):"""
             print(f"  LLM generated {len(str(code))} characters")
             code_str = str(code)
             
-            # Clean the output
-            cleaned_code = self.clean_llm_output(code_str)
+            if "```python" in code_str:
+                code_str = code_str.split("```python")[1].split("```")[0]
             
-            # Validate the cleaned code
-            if cleaned_code and self.validate_test_code(cleaned_code):
-                print(f"  Using LLM-generated tests ({len(cleaned_code)} chars after cleaning)")
+            if "def test_" in code_str:
+                print(f"  Using LLM-generated tests")
                 base = '''import subprocess
 import pytest
 import os
@@ -367,11 +275,9 @@ def setup_vault():
     yield
 
 '''
-                return base + cleaned_code.strip()
-            else:
-                print(f"  LLM output validation failed")
+                return base + code_str.strip()
         
-        print(f"  LLM generation failed or returned invalid code")
+        print(f"  LLM generation failed or returned empty")
         return self.generate_test_code_fallback(feature)
     
     def save_and_run_tests(self, feature, test_code):
