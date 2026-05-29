@@ -34,7 +34,9 @@ sequenceDiagram
     alt Vault Already Installed
         System-->>Installer: ✓ Vault v1.15.0
         Installer-->>MainSetup: ✓ Installation verified
+        deactivate Installer
         Note over MainSetup: Proceed to Step 2
+        deactivate MainSetup
     else Vault Not Installed
         Installer->>System: Install Vault
         
@@ -56,7 +58,9 @@ sequenceDiagram
         alt Verification Success
             System-->>Installer: ✓ Vault v1.15.0
             Installer-->>MainSetup: ✓ Installation verified
+            deactivate Installer
             Note over MainSetup: Proceed to Step 2
+            deactivate MainSetup
         else Verification Failed
             System-->>Installer: ❌ Command not found
             Installer-->>MainSetup: ❌ Installation failed
@@ -65,8 +69,6 @@ sequenceDiagram
             deactivate MainSetup
         end
     end
-    
-    deactivate Installer
 ```
 
 ### 1.2 STEP 2: Test Generation Sequence
@@ -100,8 +102,8 @@ sequenceDiagram
     
     alt Feature Valid
         Validator-->>Gemini: ✓ "kv" is valid
-        Gemini-->>MainSetup: ✓ Feature validated: "kv"
         deactivate Validator
+        Gemini-->>MainSetup: ✓ Feature validated: "kv"
         deactivate Gemini
         
         MainSetup->>Gemini: generate_test_suite("kv")
@@ -120,6 +122,7 @@ sequenceDiagram
         
         MainSetup->>MainSetup: ✓ Test code ready
         Note over MainSetup: Proceed to Step 3
+        deactivate MainSetup
         
     else Feature Invalid
         Validator-->>Gemini: ❌ "xyz" not in list
