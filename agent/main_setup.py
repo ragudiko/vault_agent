@@ -63,7 +63,10 @@ class VaultInstaller:
         return False
     
     def install_macos(self):
-        """Install Vault on macOS using Homebrew."""
+        """
+        Install Vault on macOS using Homebrew.
+        Reference: https://developer.hashicorp.com/vault/install#homebrew
+        """
         print("\n[macOS] Installing Vault via Homebrew...")
         
         try:
@@ -90,7 +93,10 @@ class VaultInstaller:
             return False
     
     def install_linux(self):
-        """Install Vault on Linux."""
+        """
+        Install Vault on Linux.
+        Reference: https://developer.hashicorp.com/vault/install#linux
+        """
         print("\n[Linux] Installing Vault...")
         
         try:
@@ -151,7 +157,10 @@ class VaultInstaller:
         return True
     
     def install_windows(self):
-        """Install Vault on Windows."""
+        """
+        Install Vault on Windows.
+        Reference: https://developer.hashicorp.com/vault/install#windows
+        """
         print("\n[Windows] Installing Vault via Chocolatey...")
         
         result = subprocess.run(
