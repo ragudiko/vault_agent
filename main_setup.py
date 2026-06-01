@@ -214,6 +214,16 @@ VALID_VAULT_FEATURES = [
 client = genai.Client()
 MODEL_ID = 'gemini-3.1-flash-lite'
 
+# # Define the temperature (range typically from 0.0 to 2.0)
+# custom_temperature = 0.2  # Lower = more deterministic; Higher = more creative
+
+# # Create the configuration
+# config = types.GenerationConfig(
+#     temperature=custom_temperature,
+#     max_output_tokens=1000
+# )
+
+
 
 def analyze_and_validate_intent(user_prompt: str) -> Optional[str]:
     """
@@ -257,19 +267,20 @@ def generate_test_suite(feature_name: str) -> str:
     print(f"🤖 Generating 3 robust test cases for '{feature_name}' using Gemini...")
     
     system_instruction = """
-    You are an expert QA Automation Engineer. Generate a functional, executable Python test script using `pytest`.
+    You are an expert QA Automation Engineer for Vault. Generate a functional, executable Python test script using `pytest`.
     
     Constraints:
-    1. Write exactly 3 test functions (prefixed with test_).
+    1. Write exactly 8 test functions (prefixed with test_) for the given vault feature.
     2. Use `subprocess.run(..., shell=True, capture_output=True, text=True, env=env)` to interact with the Vault CLI.
     3. Ensure you map the environment variables contextually so the CLI commands pass successfully.
+    4. Do not hallucinate, if user asks oracle secret engine, generate test cases for oracle ONLY.
     4. Keep assert statement with simple text check like assert "Success!" in result.stdout
     5. Provide valid assertions on result.stdout, result.stderr, or result.returncode.
     6. Wrap your Python script cleanly inside markdown fences: ```python ... ```
     """
     
     prompt = f"""
-    Generate an automation test file testing exactly 3 scenarios for the Vault '{feature_name}' feature backend.
+    Generate an automation test file testing exactly 8 scenarios for the Vault '{feature_name}' feature backend.
     
     Assume the user has initialized a clean environment mapping variable layout like this:
     env = {{**os.environ, "VAULT_ADDR": os.getenv("VAULT_ADDR", "http://127.0.0.1:8200"), "VAULT_TOKEN": os.getenv("VAULT_TOKEN")}}
@@ -280,7 +291,7 @@ def generate_test_suite(feature_name: str) -> str:
     response = client.models.generate_content(
         model=MODEL_ID,
         contents=prompt,
-        config=types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.2)
+        config=types.GenerateContentConfig(system_instruction=system_instruction, temperature=0.0)
     )
     
     if response is not None and response.text:
